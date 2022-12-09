@@ -1,11 +1,19 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Postman'
+description: 'This actions allow us to sync postman collection with swagger'
+author: 'Chris Hublo'
 inputs:
-  milliseconds: # change this
+  postman-api-key:
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    description: 'The Postman Api key'
+  workspace-id:
+    required: true
+    description: 'The Workspace Id the collection is added to'
+  collection-name:
+    required: true
+    description: 'The name of the collection we want to replace'
+  openapi-json:
+    required: true
+    description: 'The Open API Json'
 runs:
   using: 'node16'
   main: 'dist/index.js'

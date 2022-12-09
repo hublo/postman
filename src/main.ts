@@ -1,14 +1,29 @@
 import * as core from '@actions/core'
-import {wait} from './wait'
+import axios from 'axios'
 
 async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
+    const postmanApiKey: string = core.getInput('postman-api-key')
+    const workspaceId: string = core.getInput('workspace-id')
+    const collectionName: string = core.getInput('collection-name')
+    const openapiJson: string = core.getInput('openapi-json')
 
     core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
     core.debug(new Date().toTimeString())
+
+    const data = {
+      workspace: workspaceId,
+      type: 'json',
+      input: openapiJson
+    }
+    await axios({
+      method: 'post',
+      url: 'https://api.getpostman.com/import/openapi',
+      headers: {
+        'x-api-key': postmanApiKey
+      },
+      data
+    })
 
     core.setOutput('time', new Date().toTimeString())
   } catch (error) {
