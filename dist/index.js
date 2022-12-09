@@ -43,6 +43,7 @@ const axios_1 = __importDefault(__nccwpck_require__(1441));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            throw new Error('milliseconds not a number 22');
             const postmanApiKey = core.getInput('postman-api-key');
             const workspaceId = core.getInput('workspace-id');
             const collectionName = core.getInput('collection-name');
@@ -63,10 +64,12 @@ function run() {
                 data
             });
             core.setOutput('time', new Date().toTimeString());
+            return 'ok';
         }
         catch (error) {
             if (error instanceof Error)
-                core.setFailed(error.message);
+                core.setFailed('error.message');
+            return 'not ok';
         }
     });
 }
