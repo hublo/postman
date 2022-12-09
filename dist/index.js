@@ -43,17 +43,16 @@ const axios_1 = __importDefault(__nccwpck_require__(1441));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            throw new Error('milliseconds not a number 22');
             const postmanApiKey = core.getInput('postman-api-key');
             const workspaceId = core.getInput('workspace-id');
             const collectionName = core.getInput('collection-name');
-            const openapiJson = core.getInput('openapi-json');
+            const input = core.getInput('openapi-json');
             core.debug(new Date().toTimeString());
             core.debug(new Date().toTimeString());
             const data = {
                 workspace: workspaceId,
                 type: 'json',
-                input: openapiJson
+                input
             };
             yield (0, axios_1.default)({
                 method: 'post',
@@ -68,7 +67,7 @@ function run() {
         }
         catch (error) {
             if (error instanceof Error)
-                core.setFailed('error.message');
+                core.setFailed(error.message);
             return 'not ok';
         }
     });

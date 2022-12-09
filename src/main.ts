@@ -3,11 +3,10 @@ import axios from 'axios'
 
 async function run(): Promise<string> {
   try {
-    throw new Error('milliseconds not a number 22')
     const postmanApiKey: string = core.getInput('postman-api-key')
     const workspaceId: string = core.getInput('workspace-id')
     const collectionName: string = core.getInput('collection-name')
-    const openapiJson: string = core.getInput('openapi-json')
+    const input: string = core.getInput('openapi-json')
 
     core.debug(new Date().toTimeString())
     core.debug(new Date().toTimeString())
@@ -15,7 +14,7 @@ async function run(): Promise<string> {
     const data = {
       workspace: workspaceId,
       type: 'json',
-      input: openapiJson
+      input
     }
 
     await axios({
@@ -31,7 +30,7 @@ async function run(): Promise<string> {
 
     return 'ok'
   } catch (error) {
-    if (error instanceof Error) core.setFailed('error.message')
+    if (error instanceof Error) core.setFailed(error.message)
     return 'not ok'
   }
 }
