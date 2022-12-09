@@ -45,10 +45,8 @@ function run() {
         try {
             const postmanApiKey = core.getInput('postman-api-key');
             const workspaceId = core.getInput('workspace-id');
-            const collectionName = core.getInput('collection-name');
+            //const collectionName: string = core.getInput('collection-name')
             const input = core.getInput('openapi-json');
-            core.debug(new Date().toTimeString());
-            core.debug(new Date().toTimeString());
             const data = {
                 workspace: workspaceId,
                 type: 'json',
@@ -59,12 +57,11 @@ function run() {
                     'x-api-key': postmanApiKey
                 }
             });
-            core.setOutput('time', new Date().toTimeString());
             return 'ok';
         }
         catch (error) {
             if (error instanceof Error)
-                core.setFailed('error');
+                core.setFailed(error.message);
             return 'not ok';
         }
     });
