@@ -27,7 +27,7 @@ async function run(): Promise<string> {
 
     return 'ok'
   } catch (error) {
-    if (error instanceof Error) core.setFailed(error)
+    if (error instanceof Error) core.setFailed('error')
     return 'not ok'
   }
 }
