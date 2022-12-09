@@ -113,7 +113,7 @@ async function run(): Promise<string> {
 
     return 'ok'
   } catch (error) {
-    if (error instanceof Error) core.setFailed(error.message)
+    if (error instanceof Error) core.setFailed(JSON.stringify(error))
     return 'not ok'
   }
 }
