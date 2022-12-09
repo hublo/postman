@@ -3,6 +3,7 @@ import axios from 'axios'
 
 async function run(): Promise<string> {
   try {
+    throw new Error('milliseconds not a number 22')
     const postmanApiKey: string = core.getInput('postman-api-key')
     const workspaceId: string = core.getInput('workspace-id')
     const collectionName: string = core.getInput('collection-name')
