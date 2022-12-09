@@ -44,20 +44,15 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const postmanApiKey = core.getInput('postman-api-key');
-            const workspaceId = core.getInput('workspace-id');
-            //const collectionName: string = core.getInput('collection-name')
-            let input = core.getInput('openapi-json');
-            input = JSON.parse(input);
-            const data = {
-                workspace: workspaceId,
-                type: 'json',
-                input
-            };
-            yield axios_1.default.post('https://api.getpostman.com/import/openapi', data, {
-                headers: {
-                    'x-api-key': postmanApiKey
-                }
-            });
+            const workspace = core.getInput('workspace-id');
+            const collectionName = core.getInput('collection-name');
+            const input = JSON.parse(core.getInput('openapi-json'));
+            const collections = yield getAllCollections(workspace, postmanApiKey);
+            const collection = collections.find((e) => e.name === collectionName);
+            if (collection) {
+                yield deleteCollection(collection.id, postmanApiKey);
+            }
+            //await addCollection(input, workspace, postmanApiKey)
             return 'ok';
         }
         catch (error) {
@@ -65,6 +60,38 @@ function run() {
                 core.setFailed(JSON.stringify(error));
             return 'not ok';
         }
+    });
+}
+function addCollection(input, workspace, postmanApiKey) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield axios_1.default.post('https://api.getpostman.com/import/openapi', {
+            workspace,
+            type: 'json',
+            input
+        }, {
+            headers: {
+                'x-api-key': postmanApiKey
+            }
+        });
+    });
+}
+function deleteCollection(collectionId, postmanApiKey) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield axios_1.default.delete(`https://api.getpostman.com/collections/${collectionId}`, {
+            headers: {
+                'x-api-key': postmanApiKey
+            }
+        });
+    });
+}
+function getAllCollections(workspace, postmanApiKey) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const response = yield axios_1.default.get(`https://api.getpostman.com/collections?workspace=${workspace}`, {
+            headers: {
+                'x-api-key': postmanApiKey
+            }
+        });
+        return response.data.collections;
     });
 }
 run();
