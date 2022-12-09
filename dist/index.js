@@ -54,13 +54,10 @@ function run() {
                 type: 'json',
                 input
             };
-            yield (0, axios_1.default)({
-                method: 'post',
-                url: 'https://api.getpostman.com/import/openapi',
+            yield axios_1.default.post('https://api.getpostman.com/import/openapi', data, {
                 headers: {
                     'x-api-key': postmanApiKey
-                },
-                data
+                }
             });
             core.setOutput('time', new Date().toTimeString());
             return 'ok';

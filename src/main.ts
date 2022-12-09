@@ -17,13 +17,10 @@ async function run(): Promise<string> {
       input
     }
 
-    await axios({
-      method: 'post',
-      url: 'https://api.getpostman.com/import/openapi',
+    await axios.post('https://api.getpostman.com/import/openapi', data, {
       headers: {
         'x-api-key': postmanApiKey
-      },
-      data
+      }
     })
 
     core.setOutput('time', new Date().toTimeString())
