@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import axios from 'axios'
 
-async function run(): Promise<void> {
+async function run(): Promise<string> {
   try {
     const postmanApiKey: string = core.getInput('postman-api-key')
     const workspaceId: string = core.getInput('workspace-id')
@@ -16,6 +16,7 @@ async function run(): Promise<void> {
       type: 'json',
       input: openapiJson
     }
+
     await axios({
       method: 'post',
       url: 'https://api.getpostman.com/import/openapi',
@@ -26,8 +27,11 @@ async function run(): Promise<void> {
     })
 
     core.setOutput('time', new Date().toTimeString())
+
+    return 'ok'
   } catch (error) {
-    if (error instanceof Error) core.setFailed(error.message)
+    if (error instanceof Error) core.setFailed('error.message')
+    return 'not ok'
   }
 }
 
