@@ -45,8 +45,11 @@ function run() {
         try {
             const postmanApiKey = core.getInput('postman-api-key');
             const workspace = core.getInput('workspace-id');
-            const collectionName = core.getInput('collection-name');
+            const swaggerPath = core.getInput('swagger-path');
             const input = JSON.parse(core.getInput('openapi-json'));
+            core.setOutput('swaggerPath', swaggerPath);
+            const collectionName = getCollectionName(swaggerPath);
+            core.setOutput('collectionName', collectionName);
             const collections = yield getAllCollections(workspace, postmanApiKey);
             core.info('Output to the actions build log');
             core.debug('Output to the actions build log');
@@ -57,7 +60,6 @@ function run() {
                 yield deleteCollection(collection.id, postmanApiKey);
             }
             yield addCollection(input, workspace, postmanApiKey);
-            core.setFailed(JSON.stringify(input));
             return 'ok';
         }
         catch (error) {
@@ -66,6 +68,12 @@ function run() {
             return 'not ok';
         }
     });
+}
+function getCollectionName(swaggerPath) {
+    const a = swaggerPath.split('/');
+    const fileName = a[a.length - 1];
+    const a2 = fileName.split('.');
+    return a2[0];
 }
 function addCollection(input, workspace, postmanApiKey) {
     return __awaiter(this, void 0, void 0, function* () {
