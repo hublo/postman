@@ -15,6 +15,7 @@ async function run(): Promise<string> {
     const collection = collections.find(
       (e: Collection) => e.name === collectionName
     )
+    core.setOutput('collection', collection)
     if (collection) {
       // await deleteCollection(collection.id, postmanApiKey)
     }
@@ -32,7 +33,7 @@ async function addCollection(
   workspace: string,
   postmanApiKey: string
 ): Promise<void> {
-  await axios.post(
+  const result = await axios.post(
     'https://api.getpostman.com/import/openapi',
     {
       workspace,
@@ -45,6 +46,7 @@ async function addCollection(
       }
     }
   )
+  core.setOutput('result', result)
 }
 
 async function deleteCollection(
