@@ -23,6 +23,11 @@ inputs:
     required: false
   githubOwner:
     required: false
+  sync:
+    required: true
+    description: 'Either equal to collection or environment'
+  postmanEnvSecret1:
+    required: false
 runs:
   using: 'node16'
   main: 'dist/index.js'
