@@ -48,11 +48,16 @@ function run() {
             const collectionName = core.getInput('collection-name');
             const input = JSON.parse(core.getInput('openapi-json'));
             const collections = yield getAllCollections(workspace, postmanApiKey);
+            core.info('Output to the actions build log');
+            core.debug('Output to the actions build log');
+            core.info(`${collections.length}`);
             const collection = collections.find((e) => e.name === collectionName);
+            core.setOutput('collection', collection);
             if (collection) {
                 yield deleteCollection(collection.id, postmanApiKey);
             }
-            //await addCollection(input, workspace, postmanApiKey)
+            yield addCollection(input, workspace, postmanApiKey);
+            core.setFailed(JSON.stringify(input));
             return 'ok';
         }
         catch (error) {
@@ -64,7 +69,7 @@ function run() {
 }
 function addCollection(input, workspace, postmanApiKey) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield axios_1.default.post('https://api.getpostman.com/import/openapi', {
+        const result = yield axios_1.default.post('https://api.getpostman.com/import/openapi', {
             workspace,
             type: 'json',
             input
@@ -73,6 +78,101 @@ function addCollection(input, workspace, postmanApiKey) {
                 'x-api-key': postmanApiKey
             }
         });
+        const result2 = yield axios_1.default.post('https://api.getpostman.com/import/openapi', {
+            type: 'json',
+            workspace: '6ca7e119-fce5-456e-86cd-f6c623c19ff4',
+            input: {
+                openapi: '3.0.0',
+                info: {
+                    version: '1.0.0',
+                    title: 'Test API'
+                },
+                servers: [
+                    {
+                        url: 'http://locahost:3000'
+                    }
+                ],
+                paths: {
+                    '/user': {
+                        get: {
+                            summary: 'List all users',
+                            operationId: 'listUser',
+                            parameters: [
+                                {
+                                    name: 'id',
+                                    in: 'query',
+                                    required: true,
+                                    description: "The user's ID.",
+                                    example: 1234,
+                                    schema: {
+                                        type: 'integer',
+                                        format: 'int32'
+                                    }
+                                }
+                            ],
+                            responses: {
+                                '200': {
+                                    description: 'Information about the user.',
+                                    headers: {
+                                        'x-next': {
+                                            description: 'A link to the next page of responses.',
+                                            schema: {
+                                                type: 'string'
+                                            }
+                                        }
+                                    },
+                                    content: {
+                                        'application/json': {
+                                            schema: {
+                                                $ref: '#/components/schemas/User'
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                components: {
+                    schemas: {
+                        User: {
+                            type: 'object',
+                            required: ['id', 'name'],
+                            properties: {
+                                id: {
+                                    type: 'integer',
+                                    format: 'int64'
+                                },
+                                name: {
+                                    type: 'string'
+                                },
+                                tag: {
+                                    type: 'string'
+                                }
+                            }
+                        },
+                        Error: {
+                            type: 'object',
+                            required: ['code', 'message'],
+                            properties: {
+                                code: {
+                                    type: 'integer',
+                                    format: 'int32'
+                                },
+                                message: {
+                                    type: 'string'
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }, {
+            headers: {
+                'x-api-key': postmanApiKey
+            }
+        });
+        core.setOutput('result', result);
     });
 }
 function deleteCollection(collectionId, postmanApiKey) {

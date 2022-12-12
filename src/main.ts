@@ -17,7 +17,7 @@ async function run(): Promise<string> {
     )
     core.setOutput('collection', collection)
     if (collection) {
-      // await deleteCollection(collection.id, postmanApiKey)
+      await deleteCollection(collection.id, postmanApiKey)
     }
     await addCollection(input, workspace, postmanApiKey)
 
