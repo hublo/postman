@@ -9,20 +9,20 @@ import {getValues, JsonfileContent} from './value'
 export {syncEnvironmentWithPostman}
 
 async function syncEnvironmentWithPostman({
-  filePath,
+  githubPath,
   workspace,
   postmanApiKey,
   jsonfileContent,
   postmanEnvSecrets
 }: {
-  filePath: string
+  githubPath: string
   workspace: string
   postmanApiKey: string
   jsonfileContent: unknown
   postmanEnvSecrets: Object
 }): Promise<string> {
-  core.setOutput('filePath', filePath)
-  const environmentName = getEnvironmentName(filePath)
+  core.setOutput('githubPath', githubPath)
+  const environmentName = getEnvironmentName(githubPath)
   core.setOutput('environmentName', environmentName)
 
   const values = getValues(
@@ -42,8 +42,8 @@ async function syncEnvironmentWithPostman({
   return 'ok'
 }
 
-function getEnvironmentName(filePath: string): string {
-  const a = filePath.split('/')
+function getEnvironmentName(githubPath: string): string {
+  const a = githubPath.split('/')
   const fileName = a[a.length - 1]
   const a2 = fileName.split('.')
   return a2[0]

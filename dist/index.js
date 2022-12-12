@@ -87,8 +87,6 @@ function run() {
         try {
             const postmanApiKey = core.getInput('postman-api-key');
             const workspace = core.getInput('workspace-id');
-            const filePath = core.getInput('file-path');
-            const stringInput = core.getInput('openapi-json');
             const githubToken = core.getInput('githubToken');
             const githubRepo = core.getInput('githubRepo');
             const githubPath = core.getInput('githubPath');
@@ -102,13 +100,12 @@ function run() {
                 githubToken,
                 githubOwner,
                 githubRepo,
-                githubPath,
-                stringInput
+                githubPath
             });
             const jsonfileContent = JSON.parse(stringFileContent);
             if (sync === SyncPostman.collection) {
                 yield (0, sync_1.syncCollectionWithPostman)({
-                    filePath,
+                    githubPath,
                     workspace,
                     postmanApiKey,
                     jsonfileContent
@@ -116,7 +113,7 @@ function run() {
             }
             else if (sync === SyncPostman.environment) {
                 yield (0, sync_2.syncEnvironmentWithPostman)({
-                    filePath,
+                    githubPath,
                     workspace,
                     postmanApiKey,
                     jsonfileContent,
@@ -131,25 +128,19 @@ function run() {
         }
     });
 }
-function getStringFileContent({ githubToken, githubOwner, githubRepo, githubPath, stringInput }) {
+function getStringFileContent({ githubToken, githubOwner, githubRepo, githubPath }) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (stringInput) {
-            core.setOutput('stringInput', stringInput);
-            return stringInput;
-        }
-        else {
-            let path = githubPath.startsWith('.') ? githubPath.substr(1) : githubPath;
-            path = path.startsWith('/') ? path.substr(1) : path;
-            core.setOutput('path', path);
-            const fileContent = yield (0, github_1.getFileFromGithub)({
-                githubToken,
-                owner: githubOwner,
-                repo: githubRepo,
-                path
-            });
-            core.setOutput('fileContent', fileContent);
-            return fileContent;
-        }
+        let path = githubPath.startsWith('.') ? githubPath.substr(1) : githubPath;
+        path = path.startsWith('/') ? path.substr(1) : path;
+        core.setOutput('path', path);
+        const fileContent = yield (0, github_1.getFileFromGithub)({
+            githubToken,
+            owner: githubOwner,
+            repo: githubRepo,
+            path
+        });
+        core.setOutput('fileContent', fileContent);
+        return fileContent;
     });
 }
 run();
@@ -304,10 +295,10 @@ const core = __importStar(__nccwpck_require__(2186));
 const add_1 = __nccwpck_require__(3092);
 const delete_1 = __nccwpck_require__(9298);
 const get_1 = __nccwpck_require__(3969);
-function syncCollectionWithPostman({ filePath, workspace, postmanApiKey, jsonfileContent }) {
+function syncCollectionWithPostman({ githubPath, workspace, postmanApiKey, jsonfileContent }) {
     return __awaiter(this, void 0, void 0, function* () {
-        core.setOutput('filePath', filePath);
-        const collectionName = getCollectionName(filePath);
+        core.setOutput('githubPath', githubPath);
+        const collectionName = getCollectionName(githubPath);
         core.setOutput('collectionName', collectionName);
         const collections = yield (0, get_1.getAllCollections)(workspace, postmanApiKey);
         const collection = collections.find((e) => e.name === collectionName);
@@ -320,8 +311,8 @@ function syncCollectionWithPostman({ filePath, workspace, postmanApiKey, jsonfil
     });
 }
 exports.syncCollectionWithPostman = syncCollectionWithPostman;
-function getCollectionName(filePath) {
-    const a = filePath.split('/');
+function getCollectionName(githubPath) {
+    const a = githubPath.split('/');
     const fileName = a[a.length - 1];
     const a2 = fileName.split('.');
     return a2[0];
@@ -478,10 +469,10 @@ const add_1 = __nccwpck_require__(8138);
 const delete_1 = __nccwpck_require__(2905);
 const get_1 = __nccwpck_require__(7998);
 const value_1 = __nccwpck_require__(4766);
-function syncEnvironmentWithPostman({ filePath, workspace, postmanApiKey, jsonfileContent, postmanEnvSecrets }) {
+function syncEnvironmentWithPostman({ githubPath, workspace, postmanApiKey, jsonfileContent, postmanEnvSecrets }) {
     return __awaiter(this, void 0, void 0, function* () {
-        core.setOutput('filePath', filePath);
-        const environmentName = getEnvironmentName(filePath);
+        core.setOutput('githubPath', githubPath);
+        const environmentName = getEnvironmentName(githubPath);
         core.setOutput('environmentName', environmentName);
         const values = (0, value_1.getValues)(jsonfileContent, postmanEnvSecrets);
         const environments = yield (0, get_1.getAllEnvironments)(workspace, postmanApiKey);
@@ -495,8 +486,8 @@ function syncEnvironmentWithPostman({ filePath, workspace, postmanApiKey, jsonfi
     });
 }
 exports.syncEnvironmentWithPostman = syncEnvironmentWithPostman;
-function getEnvironmentName(filePath) {
-    const a = filePath.split('/');
+function getEnvironmentName(githubPath) {
+    const a = githubPath.split('/');
     const fileName = a[a.length - 1];
     const a2 = fileName.split('.');
     return a2[0];

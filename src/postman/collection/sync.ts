@@ -9,18 +9,18 @@ import {Collection} from './types'
 export {syncCollectionWithPostman}
 
 async function syncCollectionWithPostman({
-  filePath,
+  githubPath,
   workspace,
   postmanApiKey,
   jsonfileContent
 }: {
-  filePath: string
+  githubPath: string
   workspace: string
   postmanApiKey: string
   jsonfileContent: string
 }): Promise<string> {
-  core.setOutput('filePath', filePath)
-  const collectionName = getCollectionName(filePath)
+  core.setOutput('githubPath', githubPath)
+  const collectionName = getCollectionName(githubPath)
   core.setOutput('collectionName', collectionName)
 
   const collections = await getAllCollections(workspace, postmanApiKey)
@@ -36,8 +36,8 @@ async function syncCollectionWithPostman({
   return 'ok'
 }
 
-function getCollectionName(filePath: string): string {
-  const a = filePath.split('/')
+function getCollectionName(githubPath: string): string {
+  const a = githubPath.split('/')
   const fileName = a[a.length - 1]
   const a2 = fileName.split('.')
   return a2[0]

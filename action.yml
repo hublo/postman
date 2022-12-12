@@ -8,21 +8,15 @@ inputs:
   workspace-id:
     required: true
     description: 'The Workspace Id the collection is added to'
-  swagger-path:
-    required: true
-    description: 'The name of the collection we want to replace'
-  openapi-json:
-    required: false
-    description: 'The Open API Json'
   githubToken:
-    required: false
+    required: true
     description: 'A token to access github'
   githubRepo:
-    required: false
+    required: true
   githubPath:
-    required: false
+    required: true
   githubOwner:
-    required: false
+    required: true
   sync:
     required: true
     description: 'Either equal to collection or environment'
