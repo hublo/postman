@@ -9,16 +9,22 @@ async function run(): Promise<string> {
     const postmanApiKey: string = core.getInput('postman-api-key')
     const workspace: string = core.getInput('workspace-id')
     const swaggerPath: string = core.getInput('swagger-path')
-    const input: string = JSON.parse(core.getInput('openapi-json'))
+    const stringInput: string = core.getInput('openapi-json')
     const githubToken: string = core.getInput('githubToken')
+    const githubRepo: string = core.getInput('githubRepo')
+    const githubPath: string = core.getInput('githubPath')
+    const githubOwner: string = core.getInput('githubOwner')
 
-    const fileContent = await getFileFromGithub({
+    const stringFileContent = await getStringFileContent({
       githubToken,
-      owner: 'hublo',
-      repo: 'monorepo',
-      path: 'libs/common/api-types/src/swaggers/bff-admin.swagger.json'
+      githubOwner,
+      githubRepo,
+      githubPath,
+      stringInput
     })
-    core.setOutput('fileContent', fileContent)
+
+    const jsonfileContent = JSON.parse(stringFileContent)
+
     core.setOutput('swaggerPath', swaggerPath)
     const collectionName = getCollectionName(swaggerPath)
     core.setOutput('collectionName', collectionName)
@@ -31,13 +37,44 @@ async function run(): Promise<string> {
     if (collection) {
       await deleteCollection(collection.id, postmanApiKey)
     }
-    await addCollection(input, workspace, postmanApiKey)
+    await addCollection(jsonfileContent, workspace, postmanApiKey)
 
     return 'ok'
   } catch (error) {
     core.setOutput('error', error)
     if (error instanceof Error) core.setFailed(JSON.stringify(error))
     return 'not ok'
+  }
+}
+
+async function getStringFileContent({
+  githubToken,
+  githubOwner,
+  githubRepo,
+  githubPath,
+  stringInput
+}: {
+  githubToken: string
+  githubOwner: string
+  githubRepo: string
+  githubPath: string
+  stringInput?: string
+}): Promise<string> {
+  if (stringInput) {
+    core.setOutput('stringInput', stringInput)
+    return stringInput
+  } else {
+    let path = githubPath.startsWith('.') ? githubPath.substr(1) : githubPath
+    path = path.startsWith('/') ? path.substr(1) : path
+    core.setOutput('path', path)
+    const fileContent = await getFileFromGithub({
+      githubToken,
+      owner: githubOwner,
+      repo: githubRepo,
+      path
+    })
+    core.setOutput('fileContent', fileContent)
+    return fileContent
   }
 }
 

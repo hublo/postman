@@ -47,15 +47,19 @@ function run() {
             const postmanApiKey = core.getInput('postman-api-key');
             const workspace = core.getInput('workspace-id');
             const swaggerPath = core.getInput('swagger-path');
-            const input = JSON.parse(core.getInput('openapi-json'));
+            const stringInput = core.getInput('openapi-json');
             const githubToken = core.getInput('githubToken');
-            const fileContent = yield getFileFromGithub({
+            const githubRepo = core.getInput('githubRepo');
+            const githubPath = core.getInput('githubPath');
+            const githubOwner = core.getInput('githubOwner');
+            const stringFileContent = yield getStringFileContent({
                 githubToken,
-                owner: 'hublo',
-                repo: 'monorepo',
-                path: 'libs/common/api-types/src/swaggers/bff-admin.swagger.json'
+                githubOwner,
+                githubRepo,
+                githubPath,
+                stringInput
             });
-            core.setOutput('fileContent', fileContent);
+            const jsonfileContent = JSON.parse(stringFileContent);
             core.setOutput('swaggerPath', swaggerPath);
             const collectionName = getCollectionName(swaggerPath);
             core.setOutput('collectionName', collectionName);
@@ -65,7 +69,7 @@ function run() {
             if (collection) {
                 yield deleteCollection(collection.id, postmanApiKey);
             }
-            yield addCollection(input, workspace, postmanApiKey);
+            yield addCollection(jsonfileContent, workspace, postmanApiKey);
             return 'ok';
         }
         catch (error) {
@@ -73,6 +77,27 @@ function run() {
             if (error instanceof Error)
                 core.setFailed(JSON.stringify(error));
             return 'not ok';
+        }
+    });
+}
+function getStringFileContent({ githubToken, githubOwner, githubRepo, githubPath, stringInput }) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (stringInput) {
+            core.setOutput('stringInput', stringInput);
+            return stringInput;
+        }
+        else {
+            let path = githubPath.startsWith('.') ? githubPath.substr(1) : githubPath;
+            path = path.startsWith('/') ? path.substr(1) : path;
+            core.setOutput('path', path);
+            const fileContent = yield getFileFromGithub({
+                githubToken,
+                owner: githubOwner,
+                repo: githubRepo,
+                path
+            });
+            core.setOutput('fileContent', fileContent);
+            return fileContent;
         }
     });
 }

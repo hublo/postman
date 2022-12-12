@@ -17,6 +17,12 @@ inputs:
   githubToken:
     required: false
     description: 'A token to access github'
+  githubRepo:
+    required: false
+  githubPath:
+    required: false
+  githubOwner:
+    required: false
 runs:
   using: 'node16'
   main: 'dist/index.js'
