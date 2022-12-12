@@ -1,6 +1,42 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 3877:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getFileFromGithub = void 0;
+const octokit_1 = __nccwpck_require__(7467);
+function getFileFromGithub({ githubToken, owner, repo, path }) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const octokit = new octokit_1.Octokit({
+            auth: githubToken
+        });
+        const result = yield octokit.request('GET /repos/{owner}/{repo}/contents/{path}{?ref}', {
+            owner,
+            repo,
+            path
+        });
+        const githubFile = result.data;
+        return Buffer.from(githubFile.content, 'base64').toString('utf8');
+    });
+}
+exports.getFileFromGithub = getFileFromGithub;
+
+
+/***/ }),
+
 /***/ 3109:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -34,24 +70,34 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+/* eslint-disable no-shadow */
+/* eslint-disable sort-imports */
 const core = __importStar(__nccwpck_require__(2186));
-const octokit_1 = __nccwpck_require__(7467);
-const axios_1 = __importDefault(__nccwpck_require__(7845));
+const sync_1 = __nccwpck_require__(1632);
+const github_1 = __nccwpck_require__(3877);
+const sync_2 = __nccwpck_require__(8726);
+var SyncPostman;
+(function (SyncPostman) {
+    SyncPostman["collection"] = "collection";
+    SyncPostman["environment"] = "environment";
+})(SyncPostman || (SyncPostman = {}));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const postmanApiKey = core.getInput('postman-api-key');
             const workspace = core.getInput('workspace-id');
-            const filePath = core.getInput('swagger-path');
+            const filePath = core.getInput('file-path');
             const stringInput = core.getInput('openapi-json');
             const githubToken = core.getInput('githubToken');
             const githubRepo = core.getInput('githubRepo');
             const githubPath = core.getInput('githubPath');
             const githubOwner = core.getInput('githubOwner');
+            const sync = core.getInput('sync');
+            const postmanEnvSecret1 = core.getInput('postmanEnvSecret1');
+            const postmanEnvSecrets = {
+                postmanEnvSecret1
+            };
             const stringFileContent = yield getStringFileContent({
                 githubToken,
                 githubOwner,
@@ -60,23 +106,28 @@ function run() {
                 stringInput
             });
             const jsonfileContent = JSON.parse(stringFileContent);
-            core.setOutput('filePath', filePath);
-            const collectionName = getCollectionName(filePath);
-            core.setOutput('collectionName', collectionName);
-            const collections = yield getAllCollections(workspace, postmanApiKey);
-            const collection = collections.find((e) => e.name === collectionName);
-            core.setOutput('collection', collection);
-            if (collection) {
-                yield deleteCollection(collection.id, postmanApiKey);
+            if (sync === SyncPostman.collection) {
+                yield (0, sync_1.syncCollectionWithPostman)({
+                    filePath,
+                    workspace,
+                    postmanApiKey,
+                    jsonfileContent
+                });
             }
-            yield addCollection(jsonfileContent, workspace, postmanApiKey);
-            return 'ok';
+            else if (sync === SyncPostman.environment) {
+                yield (0, sync_2.syncEnvironmentWithPostman)({
+                    filePath,
+                    workspace,
+                    postmanApiKey,
+                    jsonfileContent,
+                    postmanEnvSecrets
+                });
+            }
         }
         catch (error) {
             core.setOutput('error', error);
             if (error instanceof Error)
                 core.setFailed(JSON.stringify(error));
-            return 'not ok';
         }
     });
 }
@@ -90,7 +141,7 @@ function getStringFileContent({ githubToken, githubOwner, githubRepo, githubPath
             let path = githubPath.startsWith('.') ? githubPath.substr(1) : githubPath;
             path = path.startsWith('/') ? path.substr(1) : path;
             core.setOutput('path', path);
-            const fileContent = yield getFileFromGithub({
+            const fileContent = yield (0, github_1.getFileFromGithub)({
                 githubToken,
                 owner: githubOwner,
                 repo: githubRepo,
@@ -101,26 +152,31 @@ function getStringFileContent({ githubToken, githubOwner, githubRepo, githubPath
         }
     });
 }
-function getCollectionName(filePath) {
-    const a = filePath.split('/');
-    const fileName = a[a.length - 1];
-    const a2 = fileName.split('.');
-    return a2[0];
-}
-function getFileFromGithub({ githubToken, owner, repo, path }) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const octokit = new octokit_1.Octokit({
-            auth: githubToken
-        });
-        const result = yield octokit.request('GET /repos/{owner}/{repo}/contents/{path}{?ref}', {
-            owner,
-            repo,
-            path
-        });
-        const githubFile = result.data;
-        return Buffer.from(githubFile.content, 'base64').toString('utf8');
+run();
+
+
+/***/ }),
+
+/***/ 3092:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
-}
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.addCollection = void 0;
+const axios_1 = __importDefault(__nccwpck_require__(1441));
 function addCollection(input, workspace, postmanApiKey) {
     return __awaiter(this, void 0, void 0, function* () {
         yield axios_1.default.post('https://api.getpostman.com/import/openapi', {
@@ -134,6 +190,31 @@ function addCollection(input, workspace, postmanApiKey) {
         });
     });
 }
+exports.addCollection = addCollection;
+
+
+/***/ }),
+
+/***/ 9298:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.deleteCollection = void 0;
+const axios_1 = __importDefault(__nccwpck_require__(1441));
 function deleteCollection(collectionId, postmanApiKey) {
     return __awaiter(this, void 0, void 0, function* () {
         yield axios_1.default.delete(`https://api.getpostman.com/collections/${collectionId}`, {
@@ -143,6 +224,31 @@ function deleteCollection(collectionId, postmanApiKey) {
         });
     });
 }
+exports.deleteCollection = deleteCollection;
+
+
+/***/ }),
+
+/***/ 3969:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getAllCollections = void 0;
+const axios_1 = __importDefault(__nccwpck_require__(1441));
 function getAllCollections(workspace, postmanApiKey) {
     return __awaiter(this, void 0, void 0, function* () {
         const response = yield axios_1.default.get(`https://api.getpostman.com/collections?workspace=${workspace}`, {
@@ -153,7 +259,283 @@ function getAllCollections(workspace, postmanApiKey) {
         return response.data.collections;
     });
 }
-run();
+exports.getAllCollections = getAllCollections;
+
+
+/***/ }),
+
+/***/ 1632:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.syncCollectionWithPostman = void 0;
+/* eslint-disable sort-imports */
+const core = __importStar(__nccwpck_require__(2186));
+const add_1 = __nccwpck_require__(3092);
+const delete_1 = __nccwpck_require__(9298);
+const get_1 = __nccwpck_require__(3969);
+function syncCollectionWithPostman({ filePath, workspace, postmanApiKey, jsonfileContent }) {
+    return __awaiter(this, void 0, void 0, function* () {
+        core.setOutput('filePath', filePath);
+        const collectionName = getCollectionName(filePath);
+        core.setOutput('collectionName', collectionName);
+        const collections = yield (0, get_1.getAllCollections)(workspace, postmanApiKey);
+        const collection = collections.find((e) => e.name === collectionName);
+        core.setOutput('collection', collection);
+        if (collection) {
+            yield (0, delete_1.deleteCollection)(collection.id, postmanApiKey);
+        }
+        yield (0, add_1.addCollection)(jsonfileContent, workspace, postmanApiKey);
+        return 'ok';
+    });
+}
+exports.syncCollectionWithPostman = syncCollectionWithPostman;
+function getCollectionName(filePath) {
+    const a = filePath.split('/');
+    const fileName = a[a.length - 1];
+    const a2 = fileName.split('.');
+    return a2[0];
+}
+
+
+/***/ }),
+
+/***/ 8138:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.addEnvironment = void 0;
+/* eslint-disable sort-imports */
+const axios_1 = __importDefault(__nccwpck_require__(1441));
+function addEnvironment(name, values, postmanApiKey) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield axios_1.default.post('https://api.getpostman.com/environments', {
+            name,
+            values
+        }, {
+            headers: {
+                'x-api-key': postmanApiKey
+            }
+        });
+    });
+}
+exports.addEnvironment = addEnvironment;
+
+
+/***/ }),
+
+/***/ 2905:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.deleteEnvironment = void 0;
+const axios_1 = __importDefault(__nccwpck_require__(1441));
+function deleteEnvironment(environmentId, postmanApiKey) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield axios_1.default.delete(`https://api.getpostman.com/environments/${environmentId}`, {
+            headers: {
+                'x-api-key': postmanApiKey
+            }
+        });
+    });
+}
+exports.deleteEnvironment = deleteEnvironment;
+
+
+/***/ }),
+
+/***/ 7998:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getAllEnvironments = void 0;
+const axios_1 = __importDefault(__nccwpck_require__(1441));
+function getAllEnvironments(workspace, postmanApiKey) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const response = yield axios_1.default.get(`https://api.getpostman.com/environments?workspace=${workspace}`, {
+            headers: {
+                'x-api-key': postmanApiKey
+            }
+        });
+        return response.data.environments;
+    });
+}
+exports.getAllEnvironments = getAllEnvironments;
+
+
+/***/ }),
+
+/***/ 8726:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.syncEnvironmentWithPostman = void 0;
+/* eslint-disable sort-imports */
+const core = __importStar(__nccwpck_require__(2186));
+const add_1 = __nccwpck_require__(8138);
+const delete_1 = __nccwpck_require__(2905);
+const get_1 = __nccwpck_require__(7998);
+const value_1 = __nccwpck_require__(4766);
+function syncEnvironmentWithPostman({ filePath, workspace, postmanApiKey, jsonfileContent, postmanEnvSecrets }) {
+    return __awaiter(this, void 0, void 0, function* () {
+        core.setOutput('filePath', filePath);
+        const environmentName = getEnvironmentName(filePath);
+        core.setOutput('environmentName', environmentName);
+        const values = (0, value_1.getValues)(jsonfileContent, postmanEnvSecrets);
+        const environments = yield (0, get_1.getAllEnvironments)(workspace, postmanApiKey);
+        const environment = environments.find((e) => e.name === environmentName);
+        core.setOutput('environment', environment);
+        if (environment) {
+            yield (0, delete_1.deleteEnvironment)(environment.id, postmanApiKey);
+        }
+        yield (0, add_1.addEnvironment)(environmentName, values, postmanApiKey);
+        return 'ok';
+    });
+}
+exports.syncEnvironmentWithPostman = syncEnvironmentWithPostman;
+function getEnvironmentName(filePath) {
+    const a = filePath.split('/');
+    const fileName = a[a.length - 1];
+    const a2 = fileName.split('.');
+    return a2[0];
+}
+
+
+/***/ }),
+
+/***/ 4766:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getValues = void 0;
+function getValues(jsonfileContent, 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+postmanEnvSecrets) {
+    const values = jsonfileContent.values;
+    return values.map((value) => {
+        if (value.secretKeyGithub) {
+            return {
+                key: value.key,
+                value: postmanEnvSecrets[value.secretKeyGithub],
+                enabled: value.enabled,
+                type: value.type
+            };
+        }
+        else {
+            return {
+                key: value.key,
+                value: value.value,
+                enabled: value.enabled,
+                type: value.type
+            };
+        }
+    });
+}
+exports.getValues = getValues;
 
 
 /***/ }),
@@ -14097,7 +14479,7 @@ var PS_SUPPORTED = __nccwpck_require__(9085);
 var jws = __nccwpck_require__(4636);
 var includes = __nccwpck_require__(7931);
 var isBoolean = __nccwpck_require__(6501);
-var isInteger = __nccwpck_require__(1441);
+var isInteger = __nccwpck_require__(9104);
 var isNumber = __nccwpck_require__(298);
 var isPlainObject = __nccwpck_require__(5723);
 var isString = __nccwpck_require__(5180);
@@ -15942,7 +16324,7 @@ module.exports = isBoolean;
 
 /***/ }),
 
-/***/ 1441:
+/***/ 9104:
 /***/ ((module) => {
 
 /**
@@ -23384,7 +23766,7 @@ module.exports = eval("require")("encoding");
 
 /***/ }),
 
-/***/ 7845:
+/***/ 1441:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
