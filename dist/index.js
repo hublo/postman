@@ -342,9 +342,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.addEnvironment = void 0;
 /* eslint-disable sort-imports */
 const axios_1 = __importDefault(__nccwpck_require__(1441));
-function addEnvironment(name, values, postmanApiKey) {
+function addEnvironment(workspace, name, values, postmanApiKey) {
     return __awaiter(this, void 0, void 0, function* () {
         yield axios_1.default.post('https://api.getpostman.com/environments', {
+            workspace,
             environment: { name, values }
         }, {
             headers: {
@@ -480,7 +481,7 @@ function syncEnvironmentWithPostman({ githubPath, workspace, postmanApiKey, json
         if (environment) {
             yield (0, delete_1.deleteEnvironment)(environment.id, postmanApiKey);
         }
-        yield (0, add_1.addEnvironment)(environmentName, values, postmanApiKey);
+        yield (0, add_1.addEnvironment)(workspace, environmentName, values, postmanApiKey);
         return 'ok';
     });
 }

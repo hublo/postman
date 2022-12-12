@@ -6,6 +6,7 @@ import {Value} from './value'
 export {addEnvironment}
 
 async function addEnvironment(
+  workspace: string,
   name: string,
   values: Value[],
   postmanApiKey: string
@@ -13,6 +14,7 @@ async function addEnvironment(
   await axios.post(
     'https://api.getpostman.com/environments',
     {
+      workspace,
       environment: {name, values}
     },
     {

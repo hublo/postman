@@ -25,6 +25,8 @@ async function run(): Promise<void> {
       postmanEnvSecret1
     }
 
+    core.setOutput('workspace', workspace)
+
     const stringFileContent = await getStringFileContent({
       githubToken,
       githubOwner,

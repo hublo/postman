@@ -37,7 +37,7 @@ async function syncEnvironmentWithPostman({
   if (environment) {
     await deleteEnvironment(environment.id, postmanApiKey)
   }
-  await addEnvironment(environmentName, values, postmanApiKey)
+  await addEnvironment(workspace, environmentName, values, postmanApiKey)
 
   return 'ok'
 }
