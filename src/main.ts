@@ -5,8 +5,12 @@ async function run(): Promise<string> {
   try {
     const postmanApiKey: string = core.getInput('postman-api-key')
     const workspace: string = core.getInput('workspace-id')
-    const collectionName: string = core.getInput('collection-name')
+    const swaggerPath: string = core.getInput('swagger-path')
     const input: string = JSON.parse(core.getInput('openapi-json'))
+
+    core.setOutput('swaggerPath', swaggerPath)
+    const collectionName = getCollectionName(swaggerPath)
+    core.setOutput('collectionName', collectionName)
 
     const collections = await getAllCollections(workspace, postmanApiKey)
     core.info('Output to the actions build log')
@@ -21,12 +25,18 @@ async function run(): Promise<string> {
     }
     await addCollection(input, workspace, postmanApiKey)
 
-    core.setFailed(JSON.stringify(input))
     return 'ok'
   } catch (error) {
     if (error instanceof Error) core.setFailed(JSON.stringify(error))
     return 'not ok'
   }
+}
+
+function getCollectionName(swaggerPath: string): string {
+  const a = swaggerPath.split('/')
+  const fileName = a[a.length - 1]
+  const a2 = fileName.split('.')
+  return a2[0]
 }
 
 async function addCollection(
