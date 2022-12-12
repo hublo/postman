@@ -12,8 +12,11 @@ inputs:
     required: true
     description: 'The name of the collection we want to replace'
   openapi-json:
-    required: true
+    required: false
     description: 'The Open API Json'
+  githubToken:
+    required: false
+    description: 'A token to access github'
 runs:
   using: 'node16'
   main: 'dist/index.js'

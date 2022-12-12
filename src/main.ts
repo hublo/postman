@@ -10,9 +10,10 @@ async function run(): Promise<string> {
     const workspace: string = core.getInput('workspace-id')
     const swaggerPath: string = core.getInput('swagger-path')
     const input: string = JSON.parse(core.getInput('openapi-json'))
+    const githubToken: string = core.getInput('githubToken')
 
     const fileContent = await getFileFromGithub({
-      githubToken: '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',
+      githubToken,
       owner: 'hublo',
       repo: 'monorepo',
       path: 'libs/common/api-types/src/swaggers/bff-admin.swagger.json'
