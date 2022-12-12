@@ -75,7 +75,7 @@ function getCollectionName(swaggerPath) {
 }
 function addCollection(input, workspace, postmanApiKey) {
     return __awaiter(this, void 0, void 0, function* () {
-        const result = yield axios_1.default.post('https://api.getpostman.com/import/openapi', {
+        yield axios_1.default.post('https://api.getpostman.com/import/openapi', {
             workspace,
             type: 'json',
             input
@@ -84,7 +84,6 @@ function addCollection(input, workspace, postmanApiKey) {
                 'x-api-key': postmanApiKey
             }
         });
-        core.setOutput('result', result);
     });
 }
 function deleteCollection(collectionId, postmanApiKey) {

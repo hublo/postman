@@ -42,7 +42,7 @@ async function addCollection(
   workspace: string,
   postmanApiKey: string
 ): Promise<void> {
-  const result = await axios.post(
+  await axios.post(
     'https://api.getpostman.com/import/openapi',
     {
       workspace,
@@ -55,8 +55,6 @@ async function addCollection(
       }
     }
   )
-
-  core.setOutput('result', result)
 }
 
 async function deleteCollection(
