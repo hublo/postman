@@ -96,6 +96,7 @@ function run() {
             const postmanEnvSecrets = {
                 postmanEnvSecret1
             };
+            core.setOutput('workspace', workspace);
             const stringFileContent = yield getStringFileContent({
                 githubToken,
                 githubOwner,
