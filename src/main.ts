@@ -1,4 +1,7 @@
 import * as core from '@actions/core'
+
+import {Octokit} from 'octokit'
+
 import axios from 'axios'
 
 async function run(): Promise<string> {
@@ -8,6 +11,13 @@ async function run(): Promise<string> {
     const swaggerPath: string = core.getInput('swagger-path')
     const input: string = JSON.parse(core.getInput('openapi-json'))
 
+    const fileContent = await getFileFromGithub({
+      githubToken: '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',
+      owner: 'hublo',
+      repo: 'monorepo',
+      path: 'libs/common/api-types/src/swaggers/bff-admin.swagger.json'
+    })
+    core.setOutput('fileContent', fileContent)
     core.setOutput('swaggerPath', swaggerPath)
     const collectionName = getCollectionName(swaggerPath)
     core.setOutput('collectionName', collectionName)
@@ -35,6 +45,37 @@ function getCollectionName(swaggerPath: string): string {
   const fileName = a[a.length - 1]
   const a2 = fileName.split('.')
   return a2[0]
+}
+
+interface IGithubFile {
+  content: string
+}
+
+async function getFileFromGithub({
+  githubToken,
+  owner,
+  repo,
+  path
+}: {
+  githubToken: string
+  owner: string
+  repo: string
+  path: string
+}): Promise<string> {
+  const octokit = new Octokit({
+    auth: githubToken
+  })
+
+  const result = await octokit.request(
+    'GET /repos/{owner}/{repo}/contents/{path}{?ref}',
+    {
+      owner,
+      repo,
+      path
+    }
+  )
+  const githubFile: IGithubFile = result.data
+  return githubFile.content
 }
 
 async function addCollection(
