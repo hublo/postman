@@ -76,7 +76,7 @@ async function getFileFromGithub({
     }
   )
   const githubFile: IGithubFile = result.data
-  return githubFile.content
+  return Buffer.from(githubFile.content, 'base64').toString('utf8')
 }
 
 async function addCollection(

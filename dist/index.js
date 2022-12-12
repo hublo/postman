@@ -93,7 +93,7 @@ function getFileFromGithub({ githubToken, owner, repo, path }) {
             path
         });
         const githubFile = result.data;
-        return githubFile.content;
+        return Buffer.from(githubFile.content, 'base64').toString('utf8');
     });
 }
 function addCollection(input, workspace, postmanApiKey) {
