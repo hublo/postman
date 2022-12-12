@@ -13,8 +13,7 @@ async function addEnvironment(
   await axios.post(
     'https://api.getpostman.com/environments',
     {
-      name,
-      values
+      environment: {name, values}
     },
     {
       headers: {

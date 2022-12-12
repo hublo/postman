@@ -345,8 +345,7 @@ const axios_1 = __importDefault(__nccwpck_require__(1441));
 function addEnvironment(name, values, postmanApiKey) {
     return __awaiter(this, void 0, void 0, function* () {
         yield axios_1.default.post('https://api.getpostman.com/environments', {
-            name,
-            values
+            environment: { name, values }
         }, {
             headers: {
                 'x-api-key': postmanApiKey
