@@ -9,13 +9,15 @@ async function run(): Promise<string> {
     const input: string = JSON.parse(core.getInput('openapi-json'))
 
     const collections = await getAllCollections(workspace, postmanApiKey)
+    core.info('Output to the actions build log')
+    core.info(`${collections.length}`)
     const collection = collections.find(
       (e: Collection) => e.name === collectionName
     )
     if (collection) {
       await deleteCollection(collection.id, postmanApiKey)
     }
-    //await addCollection(input, workspace, postmanApiKey)
+    await addCollection(input, workspace, postmanApiKey)
 
     return 'ok'
   } catch (error) {
