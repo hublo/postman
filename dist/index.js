@@ -46,7 +46,7 @@ function run() {
         try {
             const postmanApiKey = core.getInput('postman-api-key');
             const workspace = core.getInput('workspace-id');
-            const swaggerPath = core.getInput('swagger-path');
+            const filePath = core.getInput('swagger-path');
             const stringInput = core.getInput('openapi-json');
             const githubToken = core.getInput('githubToken');
             const githubRepo = core.getInput('githubRepo');
@@ -60,8 +60,8 @@ function run() {
                 stringInput
             });
             const jsonfileContent = JSON.parse(stringFileContent);
-            core.setOutput('swaggerPath', swaggerPath);
-            const collectionName = getCollectionName(swaggerPath);
+            core.setOutput('filePath', filePath);
+            const collectionName = getCollectionName(filePath);
             core.setOutput('collectionName', collectionName);
             const collections = yield getAllCollections(workspace, postmanApiKey);
             const collection = collections.find((e) => e.name === collectionName);
@@ -101,8 +101,8 @@ function getStringFileContent({ githubToken, githubOwner, githubRepo, githubPath
         }
     });
 }
-function getCollectionName(swaggerPath) {
-    const a = swaggerPath.split('/');
+function getCollectionName(filePath) {
+    const a = filePath.split('/');
     const fileName = a[a.length - 1];
     const a2 = fileName.split('.');
     return a2[0];

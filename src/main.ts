@@ -1,19 +1,31 @@
+/* eslint-disable no-shadow */
+/* eslint-disable sort-imports */
 import * as core from '@actions/core'
+import {syncCollectionWithPostman} from './postman/collection/sync'
 
-import {Octokit} from 'octokit'
+import {getFileFromGithub} from './github'
+import {syncEnvironmentWithPostman} from './postman/environment/sync'
 
-import axios from 'axios'
+enum SyncPostman {
+  collection = 'collection',
+  environment = 'environment'
+}
 
-async function run(): Promise<string> {
+async function run(): Promise<void> {
   try {
     const postmanApiKey: string = core.getInput('postman-api-key')
     const workspace: string = core.getInput('workspace-id')
-    const swaggerPath: string = core.getInput('swagger-path')
+    const filePath: string = core.getInput('file-path')
     const stringInput: string = core.getInput('openapi-json')
     const githubToken: string = core.getInput('githubToken')
     const githubRepo: string = core.getInput('githubRepo')
     const githubPath: string = core.getInput('githubPath')
     const githubOwner: string = core.getInput('githubOwner')
+    const sync: string = core.getInput('sync')
+    const postmanEnvSecret1: string = core.getInput('postmanEnvSecret1')
+    const postmanEnvSecrets = {
+      postmanEnvSecret1
+    }
 
     const stringFileContent = await getStringFileContent({
       githubToken,
@@ -22,28 +34,27 @@ async function run(): Promise<string> {
       githubPath,
       stringInput
     })
-
     const jsonfileContent = JSON.parse(stringFileContent)
 
-    core.setOutput('swaggerPath', swaggerPath)
-    const collectionName = getCollectionName(swaggerPath)
-    core.setOutput('collectionName', collectionName)
-
-    const collections = await getAllCollections(workspace, postmanApiKey)
-    const collection = collections.find(
-      (e: Collection) => e.name === collectionName
-    )
-    core.setOutput('collection', collection)
-    if (collection) {
-      await deleteCollection(collection.id, postmanApiKey)
+    if (sync === SyncPostman.collection) {
+      await syncCollectionWithPostman({
+        filePath,
+        workspace,
+        postmanApiKey,
+        jsonfileContent
+      })
+    } else if (sync === SyncPostman.environment) {
+      await syncEnvironmentWithPostman({
+        filePath,
+        workspace,
+        postmanApiKey,
+        jsonfileContent,
+        postmanEnvSecrets
+      })
     }
-    await addCollection(jsonfileContent, workspace, postmanApiKey)
-
-    return 'ok'
   } catch (error) {
     core.setOutput('error', error)
     if (error instanceof Error) core.setFailed(JSON.stringify(error))
-    return 'not ok'
   }
 }
 
@@ -76,94 +87,6 @@ async function getStringFileContent({
     core.setOutput('fileContent', fileContent)
     return fileContent
   }
-}
-
-function getCollectionName(swaggerPath: string): string {
-  const a = swaggerPath.split('/')
-  const fileName = a[a.length - 1]
-  const a2 = fileName.split('.')
-  return a2[0]
-}
-
-interface IGithubFile {
-  content: string
-}
-
-async function getFileFromGithub({
-  githubToken,
-  owner,
-  repo,
-  path
-}: {
-  githubToken: string
-  owner: string
-  repo: string
-  path: string
-}): Promise<string> {
-  const octokit = new Octokit({
-    auth: githubToken
-  })
-
-  const result = await octokit.request(
-    'GET /repos/{owner}/{repo}/contents/{path}{?ref}',
-    {
-      owner,
-      repo,
-      path
-    }
-  )
-  const githubFile: IGithubFile = result.data
-  return Buffer.from(githubFile.content, 'base64').toString('utf8')
-}
-
-async function addCollection(
-  input: string,
-  workspace: string,
-  postmanApiKey: string
-): Promise<void> {
-  await axios.post(
-    'https://api.getpostman.com/import/openapi',
-    {
-      workspace,
-      type: 'json',
-      input
-    },
-    {
-      headers: {
-        'x-api-key': postmanApiKey
-      }
-    }
-  )
-}
-
-async function deleteCollection(
-  collectionId: string,
-  postmanApiKey: string
-): Promise<void> {
-  await axios.delete(`https://api.getpostman.com/collections/${collectionId}`, {
-    headers: {
-      'x-api-key': postmanApiKey
-    }
-  })
-}
-
-interface Collection {
-  id: string
-  name: string
-}
-async function getAllCollections(
-  workspace: string,
-  postmanApiKey: string
-): Promise<Collection[]> {
-  const response = await axios.get(
-    `https://api.getpostman.com/collections?workspace=${workspace}`,
-    {
-      headers: {
-        'x-api-key': postmanApiKey
-      }
-    }
-  )
-  return response.data.collections
 }
 
 run()
