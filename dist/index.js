@@ -48,8 +48,9 @@ function run() {
             const workspace = core.getInput('workspace-id');
             const swaggerPath = core.getInput('swagger-path');
             const input = JSON.parse(core.getInput('openapi-json'));
+            const githubToken = core.getInput('githubToken');
             const fileContent = yield getFileFromGithub({
-                githubToken: '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',
+                githubToken,
                 owner: 'hublo',
                 repo: 'monorepo',
                 path: 'libs/common/api-types/src/swaggers/bff-admin.swagger.json'
