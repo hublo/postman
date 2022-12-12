@@ -39,6 +39,20 @@ async function addCollection(
     {
       workspace,
       type: 'json',
+      input
+    },
+    {
+      headers: {
+        'x-api-key': postmanApiKey
+      }
+    }
+  )
+
+  const result2 = await axios.post(
+    'https://api.getpostman.com/import/openapi',
+    {
+      type: 'json',
+      workspace: '6ca7e119-fce5-456e-86cd-f6c623c19ff4',
       input: {
         openapi: '3.0.0',
         info: {
@@ -60,7 +74,7 @@ async function addCollection(
                   name: 'id',
                   in: 'query',
                   required: true,
-                  description: "The user'''s ID.",
+                  description: "The user's ID.",
                   example: 1234,
                   schema: {
                     type: 'integer',
