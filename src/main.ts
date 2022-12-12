@@ -10,6 +10,7 @@ async function run(): Promise<string> {
 
     const collections = await getAllCollections(workspace, postmanApiKey)
     core.info('Output to the actions build log')
+    core.debug('Output to the actions build log')
     core.info(`${collections.length}`)
     const collection = collections.find(
       (e: Collection) => e.name === collectionName
