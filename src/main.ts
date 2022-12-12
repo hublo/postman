@@ -16,7 +16,7 @@ async function run(): Promise<string> {
       (e: Collection) => e.name === collectionName
     )
     if (collection) {
-      await deleteCollection(collection.id, postmanApiKey)
+      // await deleteCollection(collection.id, postmanApiKey)
     }
     await addCollection(input, workspace, postmanApiKey)
 
