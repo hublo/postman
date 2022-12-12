@@ -60,6 +60,7 @@ function run() {
             return 'ok';
         }
         catch (error) {
+            core.setOutput('error', error);
             if (error instanceof Error)
                 core.setFailed(JSON.stringify(error));
             return 'not ok';
