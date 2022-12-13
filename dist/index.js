@@ -475,6 +475,7 @@ function syncEnvironmentWithPostman({ githubPath, workspace, postmanApiKey, json
         core.setOutput('githubPath', githubPath);
         const environmentName = getEnvironmentName(githubPath);
         core.setOutput('environmentName', environmentName);
+        core.setOutput('postmanEnvSecrets', postmanEnvSecrets);
         const values = (0, value_1.getValues)(jsonfileContent, postmanEnvSecrets);
         const environments = yield (0, get_1.getAllEnvironments)(workspace, postmanApiKey);
         const environment = environments.find((e) => e.name === environmentName);
@@ -498,21 +499,43 @@ function getEnvironmentName(githubPath) {
 /***/ }),
 
 /***/ 4766:
-/***/ ((__unused_webpack_module, exports) => {
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getValues = void 0;
+const core = __importStar(__nccwpck_require__(2186));
 function getValues(jsonfileContent, 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 postmanEnvSecrets) {
     const values = jsonfileContent.values;
     return values.map((value) => {
+        var _a;
         if (value.secretKeyGithub) {
+            core.setOutput('secretKeyGithub', value.secretKeyGithub);
             return {
                 key: value.key,
-                value: postmanEnvSecrets[value.secretKeyGithub],
+                value: (_a = postmanEnvSecrets[value.secretKeyGithub]) !== null && _a !== void 0 ? _a : 'SECRET',
                 enabled: value.enabled,
                 type: value.type
             };

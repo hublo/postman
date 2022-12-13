@@ -1,3 +1,5 @@
+import * as core from '@actions/core'
+
 export {getValues, Value, JsonfileContent}
 
 interface Value {
@@ -27,9 +29,10 @@ function getValues(
   const values = jsonfileContent.values
   return values.map((value: ValueArg) => {
     if (value.secretKeyGithub) {
+      core.setOutput('secretKeyGithub', value.secretKeyGithub)
       return {
         key: value.key,
-        value: postmanEnvSecrets[value.secretKeyGithub],
+        value: postmanEnvSecrets[value.secretKeyGithub] ?? 'SECRET',
         enabled: value.enabled,
         type: value.type
       }

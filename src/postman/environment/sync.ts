@@ -24,6 +24,7 @@ async function syncEnvironmentWithPostman({
   core.setOutput('githubPath', githubPath)
   const environmentName = getEnvironmentName(githubPath)
   core.setOutput('environmentName', environmentName)
+  core.setOutput('postmanEnvSecrets', postmanEnvSecrets)
 
   const values = getValues(
     jsonfileContent as JsonfileContent,
