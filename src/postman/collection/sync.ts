@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/prefer-for-of */
 /* eslint-disable sort-imports */
 import * as core from '@actions/core'
 import {addCollection} from './add'
@@ -24,13 +25,15 @@ async function syncCollectionWithPostman({
   core.setOutput('collectionName', collectionName)
 
   const collections = await getAllCollections(workspace, postmanApiKey)
-  const collection = collections.find(
+  const filterCollections = collections.filter(
     (e: Collection) => e.name === collectionName
   )
-  core.setOutput('collection', collection)
-  if (collection) {
-    await deleteCollection(collection.id, postmanApiKey)
-  }
+  await Promise.all(
+    filterCollections.map(async (collection: Collection) =>
+      deleteCollection(collection.id, postmanApiKey)
+    )
+  )
+
   await addCollection(jsonfileContent, workspace, postmanApiKey)
 
   return 'ok'

@@ -53,7 +53,7 @@ async function run(): Promise<void> {
     }
   } catch (error) {
     core.setOutput('error', error)
-    if (error instanceof Error) core.setFailed(JSON.stringify(error))
+    core.setFailed(JSON.stringify(error))
   }
 }
 
