@@ -18,18 +18,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getFileFromGithub = void 0;
 const octokit_1 = __nccwpck_require__(7467);
-function getFileFromGithub({ githubToken, owner, repo, path }) {
+function getFileFromGithub({ githubToken, owner, repo, path, ref }) {
     return __awaiter(this, void 0, void 0, function* () {
         const octokit = new octokit_1.Octokit({
             auth: githubToken
         });
-        const result = yield octokit.request('GET /repos/{owner}/{repo}/contents/{path}{?ref}', {
+        const githubFile = yield octokit.rest.repos.getContent({
             owner,
             repo,
-            path
+            path,
+            ref
         });
-        const githubFile = result.data;
-        return Buffer.from(githubFile.content, 'base64').toString('utf8');
+        if (Array.isArray(githubFile)) {
+            throw new Error('File not found');
+        }
+        const file = githubFile.data;
+        const fileContent = Buffer.from(file.content, 'base64').toString();
+        return fileContent;
     });
 }
 exports.getFileFromGithub = getFileFromGithub;
@@ -83,6 +88,7 @@ var SyncPostman;
     SyncPostman["environment"] = "environment";
 })(SyncPostman || (SyncPostman = {}));
 function run() {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const postmanApiKey = core.getInput('postman-api-key');
@@ -92,6 +98,7 @@ function run() {
             const githubPath = core.getInput('githubPath');
             const githubOwner = core.getInput('githubOwner');
             const sync = core.getInput('sync');
+            const githubRef = (_a = core.getInput('githubRef')) !== null && _a !== void 0 ? _a : 'main';
             const postmanEnvSecret1 = core.getInput('postmanEnvSecret1');
             const postmanEnvSecrets = {
                 postmanEnvSecret1
@@ -101,7 +108,8 @@ function run() {
                 githubToken,
                 githubOwner,
                 githubRepo,
-                githubPath
+                githubPath,
+                githubRef
             });
             const jsonfileContent = JSON.parse(stringFileContent);
             if (sync === SyncPostman.collection) {
@@ -124,12 +132,11 @@ function run() {
         }
         catch (error) {
             core.setOutput('error', error);
-            if (error instanceof Error)
-                core.setFailed(JSON.stringify(error));
+            core.setFailed(JSON.stringify(error));
         }
     });
 }
-function getStringFileContent({ githubToken, githubOwner, githubRepo, githubPath }) {
+function getStringFileContent({ githubToken, githubOwner, githubRepo, githubPath, githubRef }) {
     return __awaiter(this, void 0, void 0, function* () {
         let path = githubPath.startsWith('.') ? githubPath.substr(1) : githubPath;
         path = path.startsWith('/') ? path.substr(1) : path;
@@ -138,7 +145,8 @@ function getStringFileContent({ githubToken, githubOwner, githubRepo, githubPath
             githubToken,
             owner: githubOwner,
             repo: githubRepo,
-            path
+            path,
+            ref: githubRef
         });
         core.setOutput('fileContent', fileContent);
         return fileContent;
@@ -291,6 +299,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.syncCollectionWithPostman = void 0;
+/* eslint-disable @typescript-eslint/prefer-for-of */
 /* eslint-disable sort-imports */
 const core = __importStar(__nccwpck_require__(2186));
 const add_1 = __nccwpck_require__(3092);
@@ -302,11 +311,8 @@ function syncCollectionWithPostman({ githubPath, workspace, postmanApiKey, jsonf
         const collectionName = getCollectionName(githubPath);
         core.setOutput('collectionName', collectionName);
         const collections = yield (0, get_1.getAllCollections)(workspace, postmanApiKey);
-        const collection = collections.find((e) => e.name === collectionName);
-        core.setOutput('collection', collection);
-        if (collection) {
-            yield (0, delete_1.deleteCollection)(collection.id, postmanApiKey);
-        }
+        const filterCollections = collections.filter((e) => e.name === collectionName);
+        yield Promise.all(filterCollections.map((collection) => __awaiter(this, void 0, void 0, function* () { return (0, delete_1.deleteCollection)(collection.id, postmanApiKey); })));
         yield (0, add_1.addCollection)(jsonfileContent, workspace, postmanApiKey);
         return 'ok';
     });
