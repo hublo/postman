@@ -10,25 +10,30 @@ async function getFileFromGithub({
   githubToken,
   owner,
   repo,
-  path
+  path,
+  ref
 }: {
   githubToken: string
   owner: string
   repo: string
   path: string
+  ref: string
 }): Promise<string> {
   const octokit = new Octokit({
     auth: githubToken
   })
 
-  const result = await octokit.request(
-    'GET /repos/{owner}/{repo}/contents/{path}{?ref}',
-    {
-      owner,
-      repo,
-      path
-    }
-  )
-  const githubFile: IGithubFile = result.data
-  return Buffer.from(githubFile.content, 'base64').toString('utf8')
+  const githubFile = await octokit.rest.repos.getContent({
+    owner,
+    repo,
+    path,
+    ref
+  })
+  if (Array.isArray(githubFile)) {
+    throw new Error('File not found')
+  }
+
+  const file = githubFile.data as IGithubFile
+  const fileContent = Buffer.from(file.content, 'base64').toString()
+  return fileContent
 }

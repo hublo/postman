@@ -20,6 +20,7 @@ async function run(): Promise<void> {
     const githubPath: string = core.getInput('githubPath')
     const githubOwner: string = core.getInput('githubOwner')
     const sync: string = core.getInput('sync')
+    const githubRef: string = core.getInput('githubRef') ?? 'main'
     const postmanEnvSecret1: string = core.getInput('postmanEnvSecret1')
     const postmanEnvSecrets = {
       postmanEnvSecret1
@@ -31,7 +32,8 @@ async function run(): Promise<void> {
       githubToken,
       githubOwner,
       githubRepo,
-      githubPath
+      githubPath,
+      githubRef
     })
     const jsonfileContent = JSON.parse(stringFileContent)
 
@@ -61,12 +63,14 @@ async function getStringFileContent({
   githubToken,
   githubOwner,
   githubRepo,
-  githubPath
+  githubPath,
+  githubRef
 }: {
   githubToken: string
   githubOwner: string
   githubRepo: string
   githubPath: string
+  githubRef: string
 }): Promise<string> {
   let path = githubPath.startsWith('.') ? githubPath.substr(1) : githubPath
   path = path.startsWith('/') ? path.substr(1) : path
@@ -75,7 +79,8 @@ async function getStringFileContent({
     githubToken,
     owner: githubOwner,
     repo: githubRepo,
-    path
+    path,
+    ref: githubRef
   })
   core.setOutput('fileContent', fileContent)
   return fileContent
