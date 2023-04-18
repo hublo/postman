@@ -31,13 +31,15 @@ async function syncEnvironmentWithPostman({
     postmanEnvSecrets
   )
   const environments = await getAllEnvironments(workspace, postmanApiKey)
-  const environment = environments.find(
+
+  const filterEnvironments = environments.filter(
     (e: Environment) => e.name === environmentName
   )
-  core.setOutput('environment', environment)
-  if (environment) {
-    await deleteEnvironment(environment.id, postmanApiKey)
-  }
+  await Promise.all(
+    filterEnvironments.map(async (e: Environment) =>
+      deleteEnvironment(e.id, postmanApiKey)
+    )
+  )
   await addEnvironment(workspace, environmentName, values, postmanApiKey)
 
   return 'ok'
