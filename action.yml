@@ -17,6 +17,8 @@ inputs:
     required: true
   githubOwner:
     required: true
+  githubRef:
+    required: true
   sync:
     required: true
     description: 'Either equal to collection or environment'
