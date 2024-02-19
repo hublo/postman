@@ -215,9 +215,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.deleteCollection = void 0;
 const axios_1 = __importDefault(__nccwpck_require__(1441));
-function deleteCollection(collectionId, postmanApiKey) {
+function deleteCollection(collectionUId, postmanApiKey) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield axios_1.default.delete(`https://api.getpostman.com/collections/${collectionId}`, {
+        yield axios_1.default.delete(`https://api.getpostman.com/collections/${collectionUId}`, {
             headers: {
                 'x-api-key': postmanApiKey
             }
@@ -312,7 +312,7 @@ function syncCollectionWithPostman({ githubPath, workspace, postmanApiKey, jsonf
         core.setOutput('collectionName', collectionName);
         const collections = yield (0, get_1.getAllCollections)(workspace, postmanApiKey);
         const filterCollections = collections.filter((e) => e.name === collectionName);
-        yield Promise.all(filterCollections.map((collection) => __awaiter(this, void 0, void 0, function* () { return (0, delete_1.deleteCollection)(collection.id, postmanApiKey); })));
+        yield Promise.all(filterCollections.map((collection) => __awaiter(this, void 0, void 0, function* () { return (0, delete_1.deleteCollection)(collection.uid, postmanApiKey); })));
         yield (0, add_1.addCollection)(jsonfileContent, workspace, postmanApiKey);
         return 'ok';
     });
@@ -484,11 +484,8 @@ function syncEnvironmentWithPostman({ githubPath, workspace, postmanApiKey, json
         core.setOutput('postmanEnvSecrets', postmanEnvSecrets);
         const values = (0, value_1.getValues)(jsonfileContent, postmanEnvSecrets);
         const environments = yield (0, get_1.getAllEnvironments)(workspace, postmanApiKey);
-        const environment = environments.find((e) => e.name === environmentName);
-        core.setOutput('environment', environment);
-        if (environment) {
-            yield (0, delete_1.deleteEnvironment)(environment.id, postmanApiKey);
-        }
+        const filterEnvironments = environments.filter((e) => e.name === environmentName);
+        yield Promise.all(filterEnvironments.map((e) => __awaiter(this, void 0, void 0, function* () { return (0, delete_1.deleteEnvironment)(e.id, postmanApiKey); })));
         yield (0, add_1.addEnvironment)(workspace, environmentName, values, postmanApiKey);
         return 'ok';
     });
