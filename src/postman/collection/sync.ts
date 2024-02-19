@@ -30,7 +30,7 @@ async function syncCollectionWithPostman({
   )
   await Promise.all(
     filterCollections.map(async (collection: Collection) =>
-      deleteCollection(collection.id, postmanApiKey)
+      deleteCollection(collection.uid, postmanApiKey)
     )
   )
 
