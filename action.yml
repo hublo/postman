@@ -1,6 +1,6 @@
 name: 'Postman'
 description: 'This actions allow us to sync postman collection with swagger'
-author: 'Chris Hublo'
+author: 'Hublo'
 inputs:
   postman-api-key:
     required: true
@@ -25,5 +25,5 @@ inputs:
   postmanEnvSecret1:
     required: false
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'

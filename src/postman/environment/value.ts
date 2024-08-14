@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 
-export {getValues, Value, JsonfileContent}
+export { getValues, Value, JsonfileContent }
 
 interface Value {
   key: string

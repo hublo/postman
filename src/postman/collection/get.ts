@@ -1,8 +1,8 @@
-import {Collection} from './types'
+import { Collection } from './types'
 
 import axios from 'axios'
 
-export {getAllCollections}
+export { getAllCollections }
 
 async function getAllCollections(
   workspace: string,

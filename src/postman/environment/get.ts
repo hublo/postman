@@ -1,8 +1,8 @@
-import {Environment} from './types'
+import { Environment } from './types'
 
 import axios from 'axios'
 
-export {getAllEnvironments}
+export { getAllEnvironments }
 
 async function getAllEnvironments(
   workspace: string,

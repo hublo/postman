@@ -1,9 +1,9 @@
 /* eslint-disable sort-imports */
 import axios from 'axios'
 
-import {Value} from './value'
+import { Value } from './value'
 
-export {addEnvironment}
+export { addEnvironment }
 
 async function addEnvironment(
   workspace: string,
@@ -15,7 +15,7 @@ async function addEnvironment(
     'https://api.getpostman.com/environments',
     {
       workspace,
-      environment: {name, values}
+      environment: { name, values }
     },
     {
       headers: {

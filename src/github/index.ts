@@ -1,6 +1,6 @@
-import {Octokit} from 'octokit'
+import { Octokit } from 'octokit'
 
-export {getFileFromGithub}
+export { getFileFromGithub }
 
 interface IGithubFile {
   content: string
@@ -34,6 +34,5 @@ async function getFileFromGithub({
   }
 
   const file = githubFile.data as IGithubFile
-  const fileContent = Buffer.from(file.content, 'base64').toString()
-  return fileContent
+  return Buffer.from(file.content, 'base64').toString()
 }

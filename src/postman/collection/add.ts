@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-export {addCollection}
+export { addCollection }
 
 async function addCollection(
   input: string,

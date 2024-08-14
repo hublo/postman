@@ -1,12 +1,12 @@
 /* eslint-disable sort-imports */
 import * as core from '@actions/core'
-import {addEnvironment} from './add'
-import {deleteEnvironment} from './delete'
-import {getAllEnvironments} from './get'
-import {Environment} from './types'
-import {getValues, JsonfileContent} from './value'
+import { addEnvironment } from './add'
+import { deleteEnvironment } from './delete'
+import { getAllEnvironments } from './get'
+import { Environment } from './types'
+import { getValues, JsonfileContent } from './value'
 
-export {syncEnvironmentWithPostman}
+export { syncEnvironmentWithPostman }
 
 async function syncEnvironmentWithPostman({
   githubPath,

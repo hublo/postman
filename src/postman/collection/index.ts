@@ -1,6 +1,6 @@
 /* eslint-disable sort-imports */
-import {deleteCollection} from './delete'
-import {getAllCollections} from './get'
-import {Collection} from './types'
+import { deleteCollection } from './delete'
+import { getAllCollections } from './get'
+import { Collection } from './types'
 
-export {getAllCollections, deleteCollection, Collection}
+export { getAllCollections, deleteCollection, Collection }

@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/prefer-for-of */
 /* eslint-disable sort-imports */
 import * as core from '@actions/core'
-import {addCollection} from './add'
-import {deleteCollection} from './delete'
-import {getAllCollections} from './get'
+import { addCollection } from './add'
+import { deleteCollection } from './delete'
+import { getAllCollections } from './get'
 
-import {Collection} from './types'
+import { Collection } from './types'
 
-export {syncCollectionWithPostman}
+export { syncCollectionWithPostman }
 
 async function syncCollectionWithPostman({
   githubPath,

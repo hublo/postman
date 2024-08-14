@@ -1,10 +1,9 @@
 /* eslint-disable no-shadow */
-/* eslint-disable sort-imports */
 import * as core from '@actions/core'
-import {syncCollectionWithPostman} from './postman/collection/sync'
+import { syncCollectionWithPostman } from './postman/collection/sync'
 
-import {getFileFromGithub} from './github'
-import {syncEnvironmentWithPostman} from './postman/environment/sync'
+import { getFileFromGithub } from './github'
+import { syncEnvironmentWithPostman } from './postman/environment/sync'
 
 enum SyncPostman {
   collection = 'collection',

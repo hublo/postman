@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-export {deleteEnvironment}
+export { deleteEnvironment }
 async function deleteEnvironment(
   environmentId: string,
   postmanApiKey: string
